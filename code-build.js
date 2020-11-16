@@ -31,7 +31,15 @@ async function build(sdk, params) {
   const start = await sdk.codeBuild.startBuild(params).promise();
 
   // Wait for the build to "complete"
-  return waitForBuildEndTime(sdk, start.build);
+  let waitToFinish =
+    core.getInput("wait-to-finish", { required: false }) === "true";
+  if (waitToFinish) {
+    console.log("****** Waiting the build to finish ******");
+    return waitForBuildEndTime(sdk, start.build);
+  } else {
+    console.log("****** Skipping waiting and returning *******");
+    return start.build;
+  }
 }
 
 async function waitForBuildEndTime(sdk, { id, logs }, nextToken) {
